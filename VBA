@@ -1,0 +1,166 @@
+Rem Attribute VBA_ModuleType=VBAModule
+Option VBASupport 1
+Sub Emails_Outlook()
+'Carregar e-mails do outlook para o excel
+Dim appOutlook As Object
+Dim olNS As Object
+Dim olFolder As Object
+Dim olItem As Object
+Dim r As Long
+On Error Resume Next
+Set appOutlook = GetObject(, "Outlook.Application")
+If appOutlook Is Nothing Then
+Set appOutlook = CreateObject("Outlook.Application")
+End If
+On Error GoTo 0
+Set olNS = appOutlook.GetNamespace("MAPI")
+'Abaixo preencha o nome do arquivo de dados PST e a pasta.
+'Neste caso o arquivo é Douglas Godoy e a pasta Caixa de Entrada.
+Set olFolder = olNS.Folders("pedro.paiva@gerdau.com.br").Folders("Caixa de Entrada")
+Cells.Delete
+r = 1
+'Cria um array montando o título das colunas no arquivo.
+Range("A1:I1") = Array("Título", "E-mail remetente", "Para", "Data e Hora", "Anexos", "Tamanho", "Nome do Remetente", "Tipo de acompanhamento", "Conteúdo")
+For Each olItem In olFolder.Items
+If TypeName(olItem) = "MailItem" Then
+If (olItem.SenderEmailAddress = "ADICIONAR EMAIL") Or (InStr(olItem.SenderEmailAddress, "PARTE DO EMAIL OU DOMÍNIO") > 0) Then
+r = r + 1
+Cells(r, "A") = olItem.Subject 'Assunto do e-mail
+Cells(r, "B") = olItem.SenderEmailAddress 'E-mail do remetente
+Cells(r, "C") = olItem.To 'E-mail do destinatário
+Cells(r, "D") = olItem.ReceivedTime 'Data/Hora de recebimento
+Cells(r, "E") = olItem.Attachments.Count 'Número de anexos
+Cells(r, "F") = olItem.Size 'Tamanho da mensagem em bytes
+Cells(r, "G") = olItem.SenderName 'Nome do remetente
+Cells(r, "H") = olItem.FlagRequest 'Acompanhamento
+Cells(r, "I") = olItem.Body
+Application.StatusBar = r
+End If
+End If
+Next olItem
+Columns.AutoFit
+
+'
+' Formata Macro
+' Formata planilha
+'
+' Atalho do teclado: Ctrl+Shift+F
+'
+    Range("A1:I1").Select
+    With Selection.Interior
+        .Pattern = xlSolid
+        .PatternColorIndex = xlAutomatic
+        .ThemeColor = xlThemeColorLight1
+        .TintAndShade = 0
+        .PatternTintAndShade = 0
+    End With
+   With Selection.Font
+        .ThemeColor = xlThemeColorDark1
+        .TintAndShade = 0
+    End With
+    Selection.Font.Bold = True
+    With Selection
+        .HorizontalAlignment = xlGeneral
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    With Selection
+        .HorizontalAlignment = xlCenter
+        .VerticalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+   Cells.Select
+    With Selection
+        .WrapText = True
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    With Selection
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    Range("A1").Select
+'
+' tamanhocedulas Macro
+' Formata tamanho cedulas
+'
+' Atalho do teclado: Ctrl+Shift+T
+'
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    ActiveWindow.ScrollColumn = 2
+    ActiveWindow.ScrollColumn = 3
+    ActiveWindow.ScrollColumn = 4
+    ActiveWindow.ScrollColumn = 5
+    ActiveWindow.ScrollColumn = 6
+    ActiveWindow.ScrollColumn = 7
+    ActiveWindow.ScrollColumn = 8
+    ActiveWindow.ScrollColumn = 9
+    ActiveWindow.ScrollColumn = 8
+    ActiveWindow.ScrollColumn = 7
+    ActiveWindow.ScrollColumn = 6
+    ActiveWindow.ScrollColumn = 5
+    ActiveWindow.ScrollColumn = 4
+    ActiveWindow.ScrollColumn = 3
+    ActiveWindow.ScrollColumn = 2
+    ActiveWindow.ScrollColumn = 1
+    
+'
+' Formata como tabela e classifica por nome
+'
+    Range("A1:I19").Select
+    Range(Selection, Selection.End(xlDown)).Select
+    ActiveSheet.ListObjects.Add(xlSrcRange, Range("$A:$I"), , xlYes).Name = _
+        "Tabela2"
+    Columns("A:I").Select
+    ActiveSheet.ListObjects("Tabela2").TableStyle = "TableStyleMedium15"
+    ActiveWorkbook.Worksheets("Plan1").ListObjects("Tabela2").Sort.SortFields.Clear
+    ActiveWorkbook.Worksheets("Plan1").ListObjects("Tabela2").Sort.SortFields.Add _
+        Key:=Range("Tabela2[E-mail remetente]"), SortOn:=xlSortOnValues, Order:= _
+        xlAscending, DataOption:=xlSortNormal
+    With ActiveWorkbook.Worksheets("Plan1").ListObjects("Tabela2").Sort
+        .Header = xlYes
+        .MatchCase = False
+        .Orientation = xlTopToBottom
+        .SortMethod = xlPinYin
+        .Apply
+    End With
+    
+    Dim MyOlapp As Object, MeuItem As Object
+    Set MyOlapp = CreateObject("Outlook.Application")
+    Set MeuItem = MyOlapp.CreateItem(olMailItem)
+    With MeuItem
+    
+        .To = ("EMAIL PARA ENCAMINHAR A PLANILHA")
+        .Subject = "ASSUNTO (Ref:" & Format(Now, "dd/mm/yy") & (")")
+            .HTMLBody = "<font size=3  color=1F497D face=calibri>Pedro,<br >"
+            .HTMLBody = .HTMLBody & "<font size=3 color=1F497D face=calibri><br>Segue relação de EMAILS até a data: " & Format(Now, "dd/mm/yy")
+            .HTMLBody = .HTMLBody & "<font size=3 color=1F497D face=calibri><br><html><body><font size=3>E-mail gerado automaticamente.<br>Gentileza não responder.</font></body></html>"
+           .Attachments.Add ActiveWorkbook.FullName
+        .Display
+    
+        End With
+End Sub
+
+
