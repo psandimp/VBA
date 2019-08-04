@@ -14,9 +14,7 @@ Set appOutlook = CreateObject("Outlook.Application")
 End If
 On Error GoTo 0
 Set olNS = appOutlook.GetNamespace("MAPI")
-'Abaixo preencha o nome do arquivo de dados PST e a pasta.
-'Neste caso o arquivo é Douglas Godoy e a pasta Caixa de Entrada.
-Set olFolder = olNS.Folders("pedro.paiva@gerdau.com.br").Folders("Caixa de Entrada")
+Set olFolder = olNS.Folders("SEU_EMAIL").Folders("Caixa de Entrada")
 Cells.Delete
 r = 1
 'Cria um array montando o título das colunas no arquivo.
